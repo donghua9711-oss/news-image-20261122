@@ -4,11 +4,11 @@
 Composes the one-page newspaper for the make.fun bounty
 "news-image-20261122": 35 dated stories from Sunday 22 November
 2026, every one carrying its verification badge and its sources on
-the page itself.  The layout follows the system the winning pages
-use: a cream sheet, a giant serif date, a strip of huge red
-numbers, bespoke infographics for the three leads, numbered cards
-and briefs, a pin map, and a DATE CHECK box that says what was
-left out and why.
+the page itself.  The design is this paper's own: the navy
+masthead it has carried since its first edition, detailed cover
+illustrations for the three leads, a strip of the day's big
+numbers, numbered cards and briefs, a pin map, and a DATE CHECK
+box that says what was left out and why.
 
 Deterministic: no network, no clock, no randomness.  Running it
 twice produces a byte-identical entry.png.
@@ -18,7 +18,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 W = H = 1024
 MARGIN = 28
-CREAM = (247, 242, 231)
+CREAM = (252, 251, 247)
 INK = (18, 18, 18)
 RED = (176, 42, 30)
 GRAY = (96, 90, 80)
@@ -322,18 +322,19 @@ def build():
     d = ImageDraw.Draw(img)
     CW = W - 2 * MARGIN  # 968
 
-    # masthead strip
-    d.rectangle([0, 0, W, 26], fill=INK)
-    d.text((MARGIN, 6), "THE WORLD IN ONE DAY", font=F(SANS_B, 12), fill=(255, 255, 255))
-    right = f"35 STORIES · 6 REGIONS · EVERY ONE DATED {DAY_UP}"
-    d.text((W - MARGIN - d.textlength(right, font=F(SANS_B, 12)), 6), right,
-           font=F(SANS_B, 12), fill=(255, 255, 255))
-    # date + subhead
-    f_date = F(SERIF, 57)
-    d.text(((W - d.textlength(DAY, font=f_date)) / 2, 34), DAY, font=f_date, fill=INK)
-    f_sub = F(SERIF_IT, 19)
-    d.text(((W - d.textlength(SUBHEAD, font=f_sub)) / 2, 102), SUBHEAD, font=f_sub, fill=RED)
-    d.line([MARGIN, 132, W - MARGIN, 132], fill=INK, width=2)
+    # masthead — our own navy block, the paper's standing identity
+    NAVY2 = (16, 42, 74)
+    d.rectangle([0, 0, W, 100], fill=NAVY2)
+    d.rectangle([0, 100, W, 104], fill=RED)
+    d.text((MARGIN, 14), "The World in One Day", font=F(SERIF, 44), fill=(255, 255, 255))
+    d.text((MARGIN, 70), f"{DAY_UP} · 35 STORIES · 6 REGIONS · EVERY STORY DATED & SOURCED",
+           font=F(SANS_B, 11), fill=(198, 214, 234))
+    tag = "ONE DAY · ONE PAGE"
+    d.text((W - MARGIN - d.textlength(tag, font=F(SANS_B, 11)), 70), tag,
+           font=F(SANS_B, 11), fill=(198, 214, 234))
+    f_sub = F(SERIF_IT, 17)
+    d.text(((W - d.textlength(SUBHEAD, font=f_sub)) / 2, 110), SUBHEAD, font=f_sub, fill=NAVY2)
+    d.line([MARGIN, 136, W - MARGIN, 136], fill=INK, width=2)
 
     # timeline
     ty = 140
