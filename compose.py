@@ -116,35 +116,41 @@ LEADS = [
 CARDS = [
     dict(n=4, bg=(38, 60, 92), glyph="PRESIDENTS", big="LIVE", kicker="KYIV — WAR", badge="CONFIRMED",
          head="Zelenskyy calls Putin a 'killer'",
-         body="As Trump doubled down on calling Putin 'my friend', Zelenskyy answered in one word.", src="CNN · BBC"),
+         body="Trump doubled down on 'my friend' Putin; Zelenskyy answered in one word.", src="CNN · BBC"),
     dict(n=5, bg=(100, 110, 60), glyph="KILLED", big="7", kicker="GAZA — WAR", badge="REPORTED",
          head="Seven killed in fresh Gaza strikes",
-         body="Sunday's strikes killed seven despite the ceasefire, Palestinian officials said.", src="Wafa via wires"),
+         body="Sunday strikes killed seven despite the ceasefire, officials said.", src="Wafa via wires"),
     dict(n=6, bg=(150, 40, 30), glyph="TELECOM BAN", big="FCC", kicker="BEIJING — TRADE", badge="OFFICIAL",
          head="China hits back at US telecom ban",
-         body="Beijing opposed the US ban on its telecom firms' US numbers, in a 01:57 UTC filing.", src="Commerce Min. · Reuters"),
+         body="Beijing opposed the US ban on its telecom firms' US numbers.", src="Commerce Min. · Reuters"),
     dict(n=7, bg=(36, 80, 122), glyph="SUBMARINES", big="AUKUS", kicker="CANBERRA — DEFENCE", badge="REPORTED",
          head="Marles defends AUKUS in budget row",
-         body="Australia's defence minister hit back at the US budget office over the submarine pact.", src="Reuters"),
+         body="Canberra's defence chief hit back at the US budget office over the pact.", src="Reuters"),
     dict(n=8, bg=(120, 60, 30), glyph="STRIKE CALL", big="23K", kicker="BERLIN — LABOUR", badge="OFFICIAL",
          head="23,000 German workers called out",
-         body="IG Metall called 23,000 metalworkers out on strike for Monday in a pay dispute.", src="IG Metall · Reuters"),
+         body="IG Metall called 23,000 metalworkers out on strike for Monday.", src="IG Metall · Reuters"),
     dict(n=9, bg=(70, 90, 120), glyph="COALITION", big="PM", kicker="JERUSALEM — POLITICS", badge="REPORTED",
          head="Eisenkot invites Likud to talks",
-         body="The former army chief invited Likud to open coalition talks, Israeli media reported.", src="Arab News"),
+         body="The ex-army chief invited Likud to open coalition talks.", src="Arab News"),
     dict(n=10, bg=(60, 60, 60), glyph="PRESIDENT", big="LEB", kicker="BEIRUT — POLITICS", badge="REPORTED",
          head="Aoun: no arms outside the state",
          body="Lebanon's president said no weapons may sit outside state control.", src="Arab News"),
     dict(n=11, bg=(110, 84, 50), glyph="DEAD · 6 HELD", big="16", kicker="MANIPUR, INDIA — CRIME", badge="REPORTED",
          head="Tainted-liquor toll climbs to 16",
-         body="Six people were arrested as the toll from the tainted liquor rose to sixteen.", src="Reuters · ANI"),
+         body="Six arrested as the toll from tainted liquor rose to sixteen.", src="Reuters · ANI"),
     dict(n=12, bg=(30, 100, 60), glyph="RECOVERED", big="24", kicker="NIGERIA — DISASTER", badge="CONFIRMED",
          head="24 bodies recovered after boat capsize",
-         body="Rescuers recovered 24 bodies after Friday's funeral-boat capsize in Bayelsa state.", src="AP · DW"),
+         body="24 bodies recovered after Friday's funeral-boat capsize in Bayelsa.", src="AP · DW"),
     dict(n=13, bg=(90, 40, 90), glyph="FINAL · TODAY", big="ATP", kicker="TURIN — TENNIS", badge="REPORTED",
          head="Zverev meets Alcaraz in ATP final",
-         body="The season's last match: Zverev and Alcaraz contest the ATP Finals title today.", src="ATP via wires"),
+         body="Zverev and Alcaraz contest the ATP Finals title today.", src="ATP via wires"),
 ]
+
+CARD_ART = {4: "assets/illo-kyiv.png", 5: "assets/illo-gaza.png",
+            6: "assets/illo-card-telecom.png", 7: "assets/illo-card-aukus.png",
+            8: "assets/illo-card-strike.png", 9: "assets/illo-card-jerusalem.png",
+            10: "assets/illo-card-beirut.png", 11: "assets/illo-card-manipur.png",
+            12: "assets/illo-card-boat.png", 13: "assets/illo-card-tennis.png"}
 
 BRIEFS = [
     (14, "Junín", "Quake toll: 1 dead, 16 hurt, 152 homes lost", "INDECI"),
@@ -397,24 +403,30 @@ def build():
             by += 13
         d.text((cx, by + 2), lead["src"], font=F(SANS, 8), fill=GRAY)
 
-    # cards
+    # cards — every one illustrated with a detailed cover image
     cy0, cw5, ch5 = 566, (CW - 40) // 5, 104
     for idx, card in enumerate(CARDS):
         cx = MARGIN + (idx % 5) * (cw5 + 10)
         cy = cy0 + (idx // 5) * (ch5 + 8)
-        d.rectangle([cx, cy, cx + cw5, cy + 30], fill=card["bg"])
-        d.text((cx + 7, cy + 4), card["big"], font=F(SERIF, 19), fill=(255, 255, 255))
-        gl = card["glyph"]
-        d.text((cx + cw5 - 7 - d.textlength(gl, font=F(SANS_B, 8)), cy + 10),
-               gl, font=F(SANS_B, 8), fill=(255, 255, 255))
-        badge(d, cx + cw5 - 76, cy + 34, card["badge"])
-        d.text((cx, cy + 36), fit(d, card["kicker"], F(SANS_B, 7), 104),
+        if card.get("art") or CARD_ART.get(card["n"]):
+            cover(img, card.get("art") or CARD_ART[card["n"]], cx, cy, cw5, 44)
+            badge(d, cx + cw5 - 76, cy + 4, card["badge"])
+            ky, kw_ = cy + 48, cw5
+        else:
+            d.rectangle([cx, cy, cx + cw5, cy + 30], fill=card["bg"])
+            d.text((cx + 7, cy + 4), card["big"], font=F(SERIF, 19), fill=(255, 255, 255))
+            gl = card["glyph"]
+            d.text((cx + cw5 - 7 - d.textlength(gl, font=F(SANS_B, 8)), cy + 10),
+                   gl, font=F(SANS_B, 8), fill=(255, 255, 255))
+            badge(d, cx + cw5 - 76, cy + 34, card["badge"])
+            ky, kw_ = cy + 36, 104
+        d.text((cx, ky), fit(d, card["kicker"], F(SANS_B, 7), kw_),
                font=F(SANS_B, 7), fill=INK)
-        hy = cy + 50
+        hy = ky + 14
         for ln in wrap(d, card["head"], F(SANS_B, 11), cw5)[:2]:
             d.text((cx, hy), ln, font=F(SANS_B, 11), fill=INK)
-            hy += 13
-        for ln in wrap(d, card["body"], F(SANS, 8), cw5)[:3]:
+            hy += 12
+        for ln in wrap(d, card["body"], F(SANS, 8), cw5)[:2]:
             d.text((cx, hy), ln, font=F(SANS, 8), fill=(40, 40, 40))
             hy += 10
 
