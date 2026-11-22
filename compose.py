@@ -498,6 +498,37 @@ def paint_footer(draw, y):
     return y + 40
 
 
+def verify_output(path):
+    """Re-read the composed page and check it against the
+    bounty's caps, so a bad page is caught here rather than
+    by the grader: the file must be a PNG of at most
+    1024x1024 pixels and at most 1 MiB.
+
+    The width and height come from the PNG's IHDR chunk -
+    the first chunk after the 8-byte signature: 4 bytes of
+    length, the type "IHDR", then width and height as
+    big-endian integers - never from the file name.
+    """
+    import struct
+
+    blob = path.read_bytes()
+    signature = b"\x89PNG\r\n\x1a\n"
+    if not blob.startswith(signature):
+        raise SystemExit(f"{path} is not a PNG file")
+    if blob[12:16] != b"IHDR":
+        raise SystemExit(f"{path}: first chunk is not IHDR")
+    width, height = struct.unpack(">II", blob[16:24])
+    if width > 1024 or height > 1024:
+        raise SystemExit(
+            f"{path} is {width}x{height}, over the 1024x1024 cap")
+    if len(blob) > 1_048_576:
+        raise SystemExit(
+            f"{path} is {len(blob)} bytes, over the 1 MiB cap")
+    print(f"verified {path.name}: {width}x{height}, "
+          f"{len(blob)} bytes, within both caps")
+    return width, height
+
+
 def main():
     page = Image.new("RGB", (W, H), PAPER)
     draw = ImageDraw.Draw(page)
@@ -512,6 +543,7 @@ def main():
     end = paint_footer(draw, bottom + 4)
     assert end <= H - 2, f"page overflow: ends at {end}"
     page.save(OUT)
+    verify_output(OUT)
     size = OUT.stat().st_size
     if size > 1_048_576:
         page.save(OUT.with_suffix(".jpg"), quality=88)
