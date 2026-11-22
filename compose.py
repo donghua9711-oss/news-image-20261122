@@ -1,66 +1,38 @@
 #!/usr/bin/env python3
-"""Compose the entry image for make.fun news-image-20261122:
-"The World in One Day" for Sunday 22 November 2026, holding
-37 verified stories.
+"""Compose the entry page for make.fun news-image-20261122.
 
-The page mirrors the structure of this series' winning pages,
-as the reader directed: navy masthead with date badge,
-rainbow region band, a UTC timeline, three lead cards with
-art on top, two rows of four cards, a dot-matrix world map
-and a numbered briefs block. Nothing here is copied from
-another entry - the stories are the 37 verified for this
-page (SOURCES.md), the illustrations are drawn for our
-editions and re-cropped to the card shapes on per-picture
-focal windows, and the words are set here in PIL.
+"The World in One Day" for Sunday 22 November 2026: thirty
+stories from that day's reporting, set as a single newspaper
+page of 1024x1024 pixels.  This edition was composed on the
+morning of the day itself, while its news was still
+developing; developing stories are framed on the page as
+reports, and claims are attributed.
 
-Page plan, on a 1024x1024 sheet, top to bottom:
-  masthead   a navy band: a date badge at the left (NOV / 20 /
-             FRI - 2026), the paper's name in small caps, the
-             date itself in huge white serif, an italic
-             standfirst, and the page's counts
-             (37 STORIES - 7 REGIONS - 11 DRAWN - ONE PAGE)
-  rainbow    one band of seven coloured segments, one per
-             region, each carrying its story count
-  timeline   THE DAY IN UTC: a label box and five moment
-             boxes with the day's grounded times
-  lead row   three cards with their artwork on top at about
-             2:1 - the Shenzhen declaration under the APEC
-             presidents cover, Russia's biggest barrage of the
-             year on Kyiv, and GTA VI's record first day
-  card rows  two rows of four cards, artwork on top,
-             numbered, headline and short brief: the World
-             Court judgment's fallout, Anthropic's debut
-             close, the Riyadh tower strike, the burning
-             Hormuz tanker, COP31's deal-less end, Kenya's
-             last Ebola patient, Haiti's Martissant raid and
-             the markets' fifth straight fall - eleven drawn
-             stories in all
-  bottom     WHERE IT HAPPENED at the left: the dot-matrix
-             world map, the eleven drawn stories pinned by
-             number, dots for the briefs, and the region
-             legend; at the right, ALSO ON FRIDAY 20
-             NOVEMBER - the remaining 26 stories as numbered
-             one-liners in three columns, each with a bold
-             lead word, wire-style and terse so the type can
-             stay large
-  footer     the red DATE CHECK strip and the sources line
+How the page is organised, top to bottom:
 
-The page is built to be read at thumbnail, half and full
-size, which is how the judge compares entries: headlines
-are big, briefs and one-liners keep their type floors, and
-no picture is a sliced banner - every card shows its scene
-whole on its focal window.
+  * a navy masthead carrying the paper's name, the date in a
+    large serif, a one-line standfirst and the page counts,
+    with a small date badge at the left;
+  * a coloured band split by region, each segment labelled
+    with that region's story count;
+  * a timeline strip, "THE DAY IN UTC", with five moments;
+  * three lead cards with their artwork on top, then two
+    rows of four smaller cards, eleven drawn stories in all;
+  * a dot-matrix world map, "WHERE IT HAPPENED", with the
+    drawn stories pinned by number, beside the remaining
+    stories as numbered one-line briefs;
+  * a red date-check strip and a sources line as the footer.
 
-Stories are numbered in reading order, 1 to 37. All wording
-is set here in PIL from the story data below; the
-illustrations are text-free artwork, so no lettering can
-come out garbled. SOURCES.md is the verification record
-behind every line.
+All lettering is typeset here with Pillow from the story
+tables below, so the page text is always crisp; the artwork
+in assets/ carries no lettering of its own, so nothing can
+come out garbled.  SOURCES.md in this repository is the
+verification record behind each line.
 
-Output is entry.png beside this file. If the PNG ever
-exceeds the bounty's 1 MiB cap the page is re-saved as a
-high-quality JPEG under the same name pattern the rules
-allow; at this palette the PNG stays well under.
+The composed page is written to entry.png beside this file.
+If a PNG ever exceeded the bounty's 1 MiB cap the page would
+be re-saved as a high-quality JPEG instead; at this palette
+the PNG stays well under the cap.
 """
 
 from pathlib import Path
@@ -71,6 +43,7 @@ HERE = Path(__file__).resolve().parent
 ASSETS = HERE / "assets"
 OUT = HERE / "entry.png"
 
+# Canvas and palette.
 W = H = 1024
 PAPER = (247, 242, 231)
 INK = (26, 26, 30)
@@ -85,44 +58,52 @@ GOLD = (176, 124, 24)
 GREEN = (46, 120, 62)
 DARKRED = (154, 30, 34)
 
-FDIR = "/usr/share/fonts/truetype"
-FONTS = {
-    "title": (f"{FDIR}/noto/NotoSerif-Black.ttf", 37),
-    "kicker": (f"{FDIR}/liberation/LiberationSans-Bold.ttf", 10),
-    "standfirst": (f"{FDIR}/liberation/LiberationSerif-Italic.ttf", 12),
-    "counts": (f"{FDIR}/liberation/LiberationSans-Bold.ttf", 10),
-    "badge1": (f"{FDIR}/liberation/LiberationSans-Bold.ttf", 13),
-    "badge2": (f"{FDIR}/noto/NotoSerif-Black.ttf", 30),
-    "badge3": (f"{FDIR}/liberation/LiberationSans-Bold.ttf", 8),
-    "band": (f"{FDIR}/liberation/LiberationSans-Bold.ttf", 10),
-    "tl_head": (f"{FDIR}/liberation/LiberationSans-Bold.ttf", 11),
-    "tl_time": (f"{FDIR}/liberation/LiberationSans-Bold.ttf", 10),
-    "tl_text": (f"{FDIR}/liberation/LiberationSans-Regular.ttf", 10),
-    "kick": (f"{FDIR}/liberation/LiberationSans-Bold.ttf", 9),
-    "lead_head": (f"{FDIR}/noto/NotoSerif-Bold.ttf", 24),
-    "lead_brief": (f"{FDIR}/liberation/LiberationSerif-Regular.ttf", 12),
-    "head": (f"{FDIR}/noto/NotoSerif-Bold.ttf", 15),
-    "brief": (f"{FDIR}/liberation/LiberationSerif-Regular.ttf", 11),
-    "tag": (f"{FDIR}/liberation/LiberationSans-Bold.ttf", 8),
-    "num": (f"{FDIR}/liberation/LiberationSans-Bold.ttf", 10),
-    "map_head": (f"{FDIR}/liberation/LiberationSans-Bold.ttf", 11),
-    "map_pin": (f"{FDIR}/liberation/LiberationSans-Bold.ttf", 8),
-    "legend": (f"{FDIR}/liberation/LiberationSans-Bold.ttf", 8),
-    "also_head": (f"{FDIR}/liberation/LiberationSans-Bold.ttf", 11),
-    "also_num": (f"{FDIR}/liberation/LiberationSans-Bold.ttf", 11),
-    "also_lead": (f"{FDIR}/liberation/LiberationSans-Bold.ttf", 11),
-    "also_text": (f"{FDIR}/liberation/LiberationSans-Regular.ttf", 11),
-    "datecheck": (f"{FDIR}/liberation/LiberationSans-Bold.ttf", 9),
-    "sources": (f"{FDIR}/liberation/LiberationSans-Regular.ttf", 9),
+# Type: serif display faces for headlines, sans for labels,
+# serif text faces for the briefs.  Sizes are chosen so the
+# page stays readable from thumbnail to full size.
+FONT_DIR = "/usr/share/fonts/truetype"
+FONT_FILES = {
+    "title": (f"{FONT_DIR}/noto/NotoSerif-Black.ttf", 37),
+    "kicker": (f"{FONT_DIR}/liberation/LiberationSans-Bold.ttf", 10),
+    "standfirst": (f"{FONT_DIR}/liberation/LiberationSerif-Italic.ttf", 12),
+    "counts": (f"{FONT_DIR}/liberation/LiberationSans-Bold.ttf", 10),
+    "badge_month": (f"{FONT_DIR}/liberation/LiberationSans-Bold.ttf", 13),
+    "badge_day": (f"{FONT_DIR}/noto/NotoSerif-Black.ttf", 30),
+    "badge_year": (f"{FONT_DIR}/liberation/LiberationSans-Bold.ttf", 8),
+    "band": (f"{FONT_DIR}/liberation/LiberationSans-Bold.ttf", 10),
+    "tl_head": (f"{FONT_DIR}/liberation/LiberationSans-Bold.ttf", 11),
+    "tl_time": (f"{FONT_DIR}/liberation/LiberationSans-Bold.ttf", 10),
+    "tl_text": (f"{FONT_DIR}/liberation/LiberationSans-Regular.ttf", 10),
+    "kick": (f"{FONT_DIR}/liberation/LiberationSans-Bold.ttf", 9),
+    "lead_head": (f"{FONT_DIR}/noto/NotoSerif-Bold.ttf", 24),
+    "lead_brief": (f"{FONT_DIR}/liberation/LiberationSerif-Regular.ttf", 12),
+    "head": (f"{FONT_DIR}/noto/NotoSerif-Bold.ttf", 15),
+    "brief": (f"{FONT_DIR}/liberation/LiberationSerif-Regular.ttf", 11),
+    "tag": (f"{FONT_DIR}/liberation/LiberationSans-Bold.ttf", 8),
+    "num": (f"{FONT_DIR}/liberation/LiberationSans-Bold.ttf", 10),
+    "map_head": (f"{FONT_DIR}/liberation/LiberationSans-Bold.ttf", 11),
+    "map_pin": (f"{FONT_DIR}/liberation/LiberationSans-Bold.ttf", 8),
+    "legend": (f"{FONT_DIR}/liberation/LiberationSans-Bold.ttf", 8),
+    "also_head": (f"{FONT_DIR}/liberation/LiberationSans-Bold.ttf", 11),
+    "also_num": (f"{FONT_DIR}/liberation/LiberationSans-Bold.ttf", 11),
+    "also_lead": (f"{FONT_DIR}/liberation/LiberationSans-Bold.ttf", 11),
+    "also_text": (f"{FONT_DIR}/liberation/LiberationSans-Regular.ttf", 11),
+    "datecheck": (f"{FONT_DIR}/liberation/LiberationSans-Bold.ttf", 9),
+    "sources": (f"{FONT_DIR}/liberation/LiberationSans-Regular.ttf", 9),
 }
-F = {k: ImageFont.truetype(p, s) for k, (p, s) in FONTS.items()}
+F = {name: ImageFont.truetype(path, size)
+     for name, (path, size) in FONT_FILES.items()}
 
+# Region segments for the coloured band, in reading order,
+# with the number of this page's stories from each region.
+# This edition carries six regions.
 REGION_BAND = [
     ("ASIA", 3, RED), ("EUROPE", 6, NAVY), ("AMERICAS", 5, PLUM),
     ("MIDDLE EAST", 6, TEAL), ("AFRICA", 3, GOLD),
     ("GLOBAL", 7, GRAY),
 ]
 
+# Five grounded moments for the timeline strip.
 TIMELINE = [
     ("OVERNIGHT", "Quake strikes Peru"),
     ("EARLY", "Tankers hit near Hormuz"),
@@ -131,8 +112,11 @@ TIMELINE = [
     ("LATEST", "Robot-weapons pact agreed"),
 ]
 
+# Crop window kept for compatibility with earlier editions;
+# this edition's leads all use the focal crop below.
 HERO_CROP = (40, 450, 1560, 1164)
 
+# The three lead stories, numbered 1 to 3.
 LEADS = [
     dict(n=1, art="illo-peru.png", focal=0.5, color=PLUM,
          kicker="AMERICAS · PERU",
@@ -155,6 +139,8 @@ LEADS = [
          tag="REUTERS · WIRES"),
 ]
 
+# The eight card stories that follow the leads, numbered
+# 4 to 11, in two rows of four.
 ROWS = [
     dict(n=4, art="illo-hormuz.png", focal=0.38, color=TEAL,
          kicker="MIDDLE EAST · HORMUZ",
@@ -206,6 +192,9 @@ ROWS = [
          tag="REUTERS · WIRES"),
 ]
 
+# The remaining stories as numbered one-liners: number,
+# region colour, a bold lead word or two, then the rest of
+# the line in wire style.
 BRIEFS = [
     (12, RED, "S. Korea:", "reward for exam-cheat tips"),
     (13, RED, "India:", "11 die from tainted alcohol"),
@@ -228,6 +217,10 @@ BRIEFS = [
     (30, TEAL, "Gaza:", "children watch film screening"),
 ]
 
+# Map pins for the drawn stories, as (story number,
+# longitude, latitude, region colour); a shared pill covers
+# the two United States cards, and plain dots mark a spread
+# of the briefs.
 MAP_PIN_DATA = [
     (1, -75.0, -9.2, PLUM), (2, 30.7, 36.9, GRAY),
     (3, 30.5, 50.4, NAVY), (4, 56.3, 26.5, TEAL),
@@ -241,6 +234,8 @@ MAP_DOTS = [
     (7.7, 45.1, NAVY),
 ]
 
+# The footer strip: what the date check promises, and the
+# sources line that closes the page.
 DATE_CHECK_1 = ("DATE CHECK - Every story here happened, or was first "
                 "reported, on Sunday 22 November 2026.")
 DATE_CHECK_2 = ("Sunday was still young when this page closed; developing "
@@ -249,6 +244,7 @@ DATE_CHECK_2 = ("Sunday was still young when this page closed; developing "
 SOURCES_LINE = ("Sources: Reuters · AP · AFP · Al Jazeera · BBC · UN News · "
                 "UKMTO · wires of 22 Nov 2026")
 
+# Vertical layout measurements for the page furniture.
 MASTHEAD_H = 90
 RAINBOW_H = 17
 TIMELINE_H = 34
@@ -257,259 +253,276 @@ CARD_ART_H = 94
 MAP_W, MAP_H = 300, 94
 
 
-def load_fonts():
-    return F
-
-
-def wrap(d, text, font, max_w):
-    words, lines, cur = text.split(), [], ""
-    for w_ in words:
-        t = (cur + " " + w_).strip()
-        if d.textlength(t, font=font) <= max_w:
-            cur = t
+def wrap_text(draw, text, font, max_w):
+    """Split text into lines that fit max_w, word by word."""
+    lines, current = [], ""
+    for word in text.split():
+        trial = (current + " " + word).strip()
+        if draw.textlength(trial, font=font) <= max_w:
+            current = trial
         else:
-            if cur:
-                lines.append(cur)
-            cur = w_
-    if cur:
-        lines.append(cur)
+            if current:
+                lines.append(current)
+            current = word
+    if current:
+        lines.append(current)
     return lines
 
 
-def make_wide(path, tw, th, focal=0.5):
+def crop_to_box(path, box_w, box_h, focal=0.5):
+    """Crop an artwork to a card's box around a focal point.
+
+    The window keeps the box's aspect ratio, is centred
+    vertically, and slides horizontally so the focal point
+    (a fraction of the image width) stays in frame.
+    """
     im = Image.open(path).convert("RGB")
-    src_ratio = th / tw
+    ratio = box_h / box_w
     win_w = im.width
-    win_h = int(win_w * src_ratio)
+    win_h = int(win_w * ratio)
     if win_h > im.height:
         win_h = im.height
-        win_w = int(win_h / src_ratio)
-    cx = int(im.width * focal)
-    x0 = min(max(cx - win_w // 2, 0), im.width - win_w)
+        win_w = int(win_h / ratio)
+    centre_x = int(im.width * focal)
+    x0 = min(max(centre_x - win_w // 2, 0), im.width - win_w)
     y0 = (im.height - win_h) // 2
-    return im.crop((x0, y0, x0 + win_w, y0 + win_h)).resize((tw, th),
-                                                           Image.LANCZOS)
+    return im.crop((x0, y0, x0 + win_w, y0 + win_h)).resize(
+        (box_w, box_h), Image.LANCZOS)
 
 
-def make_hero(path, tw, th):
-    im = Image.open(path).convert("RGB")
-    return im.crop(HERO_CROP).resize((tw, th), Image.LANCZOS)
-
-
-def shrink_to_fit(d, text, font_path, size, max_w, floor=8):
+def shrink_font(draw, text, font_path, size, max_w, floor=8):
+    """Largest size at or below `size` that fits max_w."""
     while size > floor:
-        f = ImageFont.truetype(font_path, size)
-        if d.textlength(text, font=f) <= max_w:
-            return f
+        candidate = ImageFont.truetype(font_path, size)
+        if draw.textlength(text, font=candidate) <= max_w:
+            return candidate
         size -= 1
     return ImageFont.truetype(font_path, floor)
 
 
-def draw_masthead(d):
-    d.rectangle([0, 0, W, MASTHEAD_H], fill=NAVY)
-    d.text((118, 10), "THE WORLD IN ONE DAY", font=F["kicker"],
-           fill=(255, 255, 255))
-    d.text((116, 21), "Sunday 22 November 2026", font=F["title"],
-           fill=(255, 255, 255))
-    d.text((118, 62),
-           "Everything on this page happened, or was first reported, "
-           "on Sunday 22 November 2026.",
-           font=F["standfirst"], fill=(216, 222, 235))
-    d.text((118, 76), "30 STORIES · 6 REGIONS · 11 DRAWN · ONE PAGE",
-           font=F["counts"], fill=(240, 200, 90))
-    d.rounded_rectangle([24, 8, 100, 82], 8, fill=(240, 244, 250))
-    d.text((62, 11), "NOV", font=F["badge1"], fill=NAVY, anchor="ma")
-    d.text((62, 26), "22", font=F["badge2"], fill=NAVY, anchor="ma")
-    d.text((62, 60), "SUN · 2026", font=F["badge3"], fill=NAVY,
-           anchor="ma")
+def paint_masthead(draw):
+    """The navy masthead: badge, paper name, date, counts."""
+    draw.rectangle([0, 0, W, MASTHEAD_H], fill=NAVY)
+    draw.text((118, 10), "THE WORLD IN ONE DAY", font=F["kicker"],
+              fill=(255, 255, 255))
+    draw.text((116, 21), "Sunday 22 November 2026", font=F["title"],
+              fill=(255, 255, 255))
+    draw.text((118, 62),
+              "Everything on this page happened, or was first reported, "
+              "on Sunday 22 November 2026.",
+              font=F["standfirst"], fill=(216, 222, 235))
+    draw.text((118, 76), "30 STORIES · 6 REGIONS · 11 DRAWN · ONE PAGE",
+              font=F["counts"], fill=(240, 200, 90))
+    draw.rounded_rectangle([24, 8, 100, 82], 8, fill=(240, 244, 250))
+    draw.text((62, 11), "NOV", font=F["badge_month"], fill=NAVY,
+              anchor="ma")
+    draw.text((62, 26), "22", font=F["badge_day"], fill=NAVY,
+              anchor="ma")
+    draw.text((62, 60), "SUN · 2026", font=F["badge_year"], fill=NAVY,
+              anchor="ma")
 
 
-def draw_band(d, y):
-    total = sum(c for _, c, _ in REGION_BAND)
+def paint_region_band(draw, top):
+    """The rainbow band: one segment per region, by count."""
+    total = sum(count for _, count, _ in REGION_BAND)
     x = 24
-    for name, count, color in REGION_BAND:
-        w_ = int((W - 48) * count / total)
-        d.rectangle([x, y, x + w_, y + RAINBOW_H], fill=color)
+    for name, count, colour in REGION_BAND:
+        seg_w = int((W - 48) * count / total)
+        draw.rectangle([x, top, x + seg_w, top + RAINBOW_H], fill=colour)
         label = f"{name} {count}"
-        tw = d.textlength(label, font=F["band"])
-        d.text((x + (w_ - tw) / 2, y + 3), label, font=F["band"],
-               fill=(255, 255, 255))
-        x += w_
-    return y + RAINBOW_H
+        label_w = draw.textlength(label, font=F["band"])
+        draw.text((x + (seg_w - label_w) / 2, top + 3), label,
+                  font=F["band"], fill=(255, 255, 255))
+        x += seg_w
+    return top + RAINBOW_H
 
 
-def draw_timeline(d, y):
-    d.rectangle([24, y, 122, y + TIMELINE_H], fill=NAVY)
-    d.text((32, y + 4), "THE DAY", font=F["tl_head"],
-           fill=(255, 255, 255))
-    d.text((32, y + 18), "IN UTC", font=F["tl_head"],
-           fill=(255, 255, 255))
+def paint_timeline(draw, top):
+    """The day-in-UTC strip: a label box and five moments."""
+    draw.rectangle([24, top, 122, top + TIMELINE_H], fill=NAVY)
+    draw.text((32, top + 4), "THE DAY", font=F["tl_head"],
+              fill=(255, 255, 255))
+    draw.text((32, top + 18), "IN UTC", font=F["tl_head"],
+              fill=(255, 255, 255))
     n = len(TIMELINE)
-    bw = (W - 48 - 98 - 6 - (n - 1) * 6) / n
+    box_w = (W - 48 - 98 - 6 - (n - 1) * 6) / n
     x = 128.0
-    for time, text in TIMELINE:
-        d.rectangle([x, y, x + bw, y + TIMELINE_H], fill=(238, 233, 220))
-        d.text((x + 8, y + 3), time, font=F["tl_time"], fill=DARKRED)
-        d.text((x + 8, y + 18), text, font=F["tl_text"], fill=INK)
-        x += bw + 6
-    return y + TIMELINE_H
+    for moment, text in TIMELINE:
+        draw.rectangle([x, top, x + box_w, top + TIMELINE_H],
+                       fill=(238, 233, 220))
+        draw.text((x + 8, top + 3), moment, font=F["tl_time"],
+                  fill=DARKRED)
+        draw.text((x + 8, top + 18), text, font=F["tl_text"], fill=INK)
+        x += box_w + 6
+    return top + TIMELINE_H
 
 
-def draw_card(d, img, x, y, w_, story, lead=False):
+def paint_card(draw, page, x, y, card_w, story, lead=False):
+    """One story card: artwork on top, then kicker, headline,
+    brief and source tag; returns the card's bottom edge."""
     art_h = LEAD_ART_H if lead else CARD_ART_H
-    head_f = F["lead_head"] if lead else F["head"]
-    brief_f = F["lead_brief"] if lead else F["brief"]
-    head_lh = 31 if lead else 19
-    brief_lh = 15 if lead else 13
-    head_lines = wrap(d, story["head"], head_f, w_ - 16)
-    brief_lines = wrap(d, story["brief"], brief_f, w_ - 16)
+    head_font = F["lead_head"] if lead else F["head"]
+    brief_font = F["lead_brief"] if lead else F["brief"]
+    head_step = 31 if lead else 19
+    brief_step = 15 if lead else 13
+    head_lines = wrap_text(draw, story["head"], head_font, card_w - 16)
+    brief_lines = wrap_text(draw, story["brief"], brief_font, card_w - 16)
     assert len(head_lines) <= 2, (story["n"], head_lines)
     assert len(brief_lines) <= 3, (story["n"], brief_lines)
-    height = (art_h + 3 + 13 + 4 + len(head_lines) * head_lh + 2
-              + len(brief_lines) * brief_lh + 4 + 11 + 8)
-    d.rectangle([x, y, x + w_, y + height], fill=CARD)
-    d.rectangle([x, y, x + w_, y + height], outline=RULE)
-    if story.get("hero"):
-        art = make_hero(ASSETS / story["art"], int(w_), art_h)
-    else:
-        art = make_wide(ASSETS / story["art"], int(w_), art_h,
-                        story.get("focal", 0.5))
-    img.paste(art, (int(x), int(y)))
-    d.ellipse([x + w_ - 30, y + art_h - 30, x + w_ - 6, y + art_h - 6],
-              fill=story["color"])
-    d.text((x + w_ - 18, y + art_h - 24), str(story["n"]),
-           font=F["num"], fill=(255, 255, 255), anchor="ma")
+    height = (art_h + 3 + 13 + 4 + len(head_lines) * head_step + 2
+              + len(brief_lines) * brief_step + 4 + 11 + 8)
+    draw.rectangle([x, y, x + card_w, y + height], fill=CARD)
+    draw.rectangle([x, y, x + card_w, y + height], outline=RULE)
+    art = crop_to_box(ASSETS / story["art"], int(card_w), art_h,
+                      story.get("focal", 0.5))
+    page.paste(art, (int(x), int(y)))
+    # The story's number rides on a coloured disc over the art.
+    draw.ellipse([x + card_w - 30, y + art_h - 30,
+                  x + card_w - 6, y + art_h - 6], fill=story["color"])
+    draw.text((x + card_w - 18, y + art_h - 24), str(story["n"]),
+              font=F["num"], fill=(255, 255, 255), anchor="ma")
     ty = y + art_h + 3
-    d.text((x + 8, ty), story["kicker"], font=F["kick"],
-           fill=story["color"])
+    draw.text((x + 8, ty), story["kicker"], font=F["kick"],
+              fill=story["color"])
     ty += 13
-    for ln in head_lines:
+    for line in head_lines:
         ty += 4
-        d.text((x + 8, ty), ln, font=head_f, fill=INK)
-        ty += head_lh - 4
+        draw.text((x + 8, ty), line, font=head_font, fill=INK)
+        ty += head_step - 4
     ty += 2
-    for ln in brief_lines:
-        d.text((x + 8, ty), ln, font=brief_f, fill=(52, 48, 44))
-        ty += brief_lh
+    for line in brief_lines:
+        draw.text((x + 8, ty), line, font=brief_font, fill=(52, 48, 44))
+        ty += brief_step
     ty += 4
-    d.text((x + 8, ty), story["tag"], font=F["tag"], fill=GRAY)
+    draw.text((x + 8, ty), story["tag"], font=F["tag"], fill=GRAY)
     return y + height
 
 
-def draw_cards(d, img, y):
+def paint_cards(draw, page, top):
+    """The lead row of three, then two rows of four cards."""
     gap = 10
     lead_w = (W - 48 - 2 * gap) / 3
-    lead_bottom = y
+    lead_bottom = top
     for i, story in enumerate(LEADS):
-        b = draw_card(d, img, 24 + i * (lead_w + gap), y, lead_w,
-                      story, lead=True)
-        lead_bottom = max(lead_bottom, b)
+        bottom = paint_card(draw, page, 24 + i * (lead_w + gap), top,
+                            lead_w, story, lead=True)
+        lead_bottom = max(lead_bottom, bottom)
     y = lead_bottom + gap
     card_w = (W - 48 - 3 * gap) / 4
     row_bottom = y
     for i, story in enumerate(ROWS):
         if i == 4:
             y = row_bottom + gap
-        b = draw_card(d, img, 24 + (i % 4) * (card_w + gap), y,
-                      card_w, story)
-        row_bottom = max(row_bottom, b)
+        bottom = paint_card(draw, page, 24 + (i % 4) * (card_w + gap),
+                            y, card_w, story)
+        row_bottom = max(row_bottom, bottom)
     return row_bottom
 
 
 def lonlat_to_xy(lon, lat, x0, y0):
+    """Project a longitude/latitude onto the map's box."""
     return (x0 + (lon + 180) / 360 * MAP_W,
             y0 + (85 - lat) / 125 * MAP_H)
 
 
-def draw_map(d, x, y):
-    d.text((x, y), "WHERE IT HAPPENED", font=F["map_head"], fill=NAVY)
-    my = y + 16
+def paint_map(draw, x, y):
+    """The dot-matrix world map with pins, dots and legend."""
+    draw.text((x, y), "WHERE IT HAPPENED", font=F["map_head"], fill=NAVY)
+    map_y = y + 16
     rows = MAP_ROWS
     assert len(rows) == 25 and all(len(r) == 100 for r in rows)
-    cw_ = MAP_W / 100
-    ch_ = MAP_H / 25
+    cell_w = MAP_W / 100
+    cell_h = MAP_H / 25
     for ri, row in enumerate(rows):
         for ci, ch in enumerate(row):
             if ch != ".":
-                d.ellipse([x + ci * cw_ + 0.4, my + ri * ch_ + 0.4,
-                           x + (ci + 1) * cw_ - 0.4,
-                           my + (ri + 1) * ch_ - 0.4],
-                          fill=(198, 190, 172))
-    for lon, lat, color in MAP_DOTS:
-        px, py = lonlat_to_xy(lon, lat, x, my)
-        d.ellipse([px - 2.5, py - 2.5, px + 2.5, py + 2.5], fill=color)
-    for n, lon, lat, color in MAP_PIN_DATA:
-        px, py = lonlat_to_xy(lon, lat, x, my)
-        d.ellipse([px - 8, py - 8, px + 8, py + 8], fill=color)
-        d.text((px, py - 6), str(n), font=F["map_pin"],
-               fill=(255, 255, 255), anchor="ma")
-    label, lon, lat, color = MAP_PILL
-    px, py = lonlat_to_xy(lon, lat, x, my)
-    pw = d.textlength(label, font=F["map_pin"]) + 10
-    d.rounded_rectangle([px - pw / 2, py - 8, px + pw / 2, py + 8], 8,
-                        fill=color)
-    d.text((px, py - 6), label, font=F["map_pin"],
-           fill=(255, 255, 255), anchor="ma")
-    ly = my + MAP_H + 6
-    d.text((x, ly),
-           "ASIA 3 · EUROPE 6 · AMERICAS 5 · MID EAST 6 · AFRICA 3 · GLOBAL 7",
-           font=F["legend"], fill=GRAY)
-    return ly + 12
+                draw.ellipse([x + ci * cell_w + 0.4,
+                              map_y + ri * cell_h + 0.4,
+                              x + (ci + 1) * cell_w - 0.4,
+                              map_y + (ri + 1) * cell_h - 0.4],
+                             fill=(198, 190, 172))
+    for lon, lat, colour in MAP_DOTS:
+        px, py = lonlat_to_xy(lon, lat, x, map_y)
+        draw.ellipse([px - 2.5, py - 2.5, px + 2.5, py + 2.5],
+                     fill=colour)
+    for n, lon, lat, colour in MAP_PIN_DATA:
+        px, py = lonlat_to_xy(lon, lat, x, map_y)
+        draw.ellipse([px - 8, py - 8, px + 8, py + 8], fill=colour)
+        draw.text((px, py - 6), str(n), font=F["map_pin"],
+                  fill=(255, 255, 255), anchor="ma")
+    label, lon, lat, colour = MAP_PILL
+    px, py = lonlat_to_xy(lon, lat, x, map_y)
+    pill_w = draw.textlength(label, font=F["map_pin"]) + 10
+    draw.rounded_rectangle([px - pill_w / 2, py - 8,
+                            px + pill_w / 2, py + 8], 8, fill=colour)
+    draw.text((px, py - 6), label, font=F["map_pin"],
+              fill=(255, 255, 255), anchor="ma")
+    legend_y = map_y + MAP_H + 6
+    draw.text((x, legend_y),
+              "ASIA 3 · EUROPE 6 · AMERICAS 5 · MID EAST 6 · "
+              "AFRICA 3 · GLOBAL 7",
+              font=F["legend"], fill=GRAY)
+    return legend_y + 12
 
 
-def draw_also(d, x, y, w_):
-    d.text((x, y), "ALSO ON SUNDAY 22 NOVEMBER", font=F["also_head"],
-           fill=NAVY)
+def paint_briefs(draw, x, y, width):
+    """The one-line briefs in three columns, numbered."""
+    draw.text((x, y), "ALSO ON SUNDAY 22 NOVEMBER",
+              font=F["also_head"], fill=NAVY)
     ty = y + 14
     per_col = (len(BRIEFS) + 2) // 3
-    col_w = w_ / 3
-    for i, (n, color, lead, rest) in enumerate(BRIEFS):
+    col_w = width / 3
+    for i, (n, colour, lead, rest) in enumerate(BRIEFS):
         col, row = divmod(i, per_col)
         cx = x + col * col_w
         cy = ty + row * 13
-        d.text((cx, cy), f"{n}", font=F["also_num"], fill=color)
-        lx = cx + d.textlength(f"{n} ", font=F["also_num"])
-        d.text((lx, cy), lead, font=F["also_lead"], fill=INK)
-        rx = lx + d.textlength(lead + " ", font=F["also_lead"])
-        f_rest = shrink_to_fit(d, rest, FONTS["also_text"][0], 11,
-                               x + (col + 1) * col_w - 8 - rx)
-        d.text((rx, cy), rest, font=f_rest, fill=(52, 48, 44))
+        draw.text((cx, cy), f"{n}", font=F["also_num"], fill=colour)
+        lead_x = cx + draw.textlength(f"{n} ", font=F["also_num"])
+        draw.text((lead_x, cy), lead, font=F["also_lead"], fill=INK)
+        rest_x = lead_x + draw.textlength(lead + " ",
+                                          font=F["also_lead"])
+        rest_font = shrink_font(draw, rest, FONT_FILES["also_text"][0],
+                                11, x + (col + 1) * col_w - 8 - rest_x)
+        draw.text((rest_x, cy), rest, font=rest_font, fill=(52, 48, 44))
     return ty + per_col * 13
 
 
-def draw_footer(d, y):
-    d.rectangle([24, y, W - 24, y + 26], fill=DARKRED)
-    d.text((36, y + 2), DATE_CHECK_1, font=F["datecheck"],
-           fill=(255, 255, 255))
-    d.text((36, y + 14), DATE_CHECK_2, font=F["datecheck"],
-           fill=(255, 235, 235))
-    d.text((24, y + 29), SOURCES_LINE, font=F["sources"], fill=GRAY)
+def paint_footer(draw, y):
+    """The red date-check strip and the sources line."""
+    draw.rectangle([24, y, W - 24, y + 26], fill=DARKRED)
+    draw.text((36, y + 2), DATE_CHECK_1, font=F["datecheck"],
+              fill=(255, 255, 255))
+    draw.text((36, y + 14), DATE_CHECK_2, font=F["datecheck"],
+              fill=(255, 235, 235))
+    draw.text((24, y + 29), SOURCES_LINE, font=F["sources"], fill=GRAY)
     return y + 40
 
 
 def main():
-    img = Image.new("RGB", (W, H), PAPER)
-    d = ImageDraw.Draw(img)
-    draw_masthead(d)
-    y = draw_band(d, MASTHEAD_H + 2) + 4
-    y = draw_timeline(d, y) + 4
-    y = draw_cards(d, img, y) + 6
-    map_bottom = draw_map(d, 24, y)
-    also_bottom = draw_also(d, 24 + MAP_W + 16, y - 2, W - 48 - MAP_W - 16)
+    page = Image.new("RGB", (W, H), PAPER)
+    draw = ImageDraw.Draw(page)
+    paint_masthead(draw)
+    y = paint_region_band(draw, MASTHEAD_H + 2) + 4
+    y = paint_timeline(draw, y) + 4
+    y = paint_cards(draw, page, y) + 6
+    map_bottom = paint_map(draw, 24, y)
+    also_bottom = paint_briefs(draw, 24 + MAP_W + 16, y - 2,
+                               W - 48 - MAP_W - 16)
     bottom = max(map_bottom, also_bottom)
-    end = draw_footer(d, bottom + 4)
+    end = paint_footer(draw, bottom + 4)
     assert end <= H - 2, f"page overflow: ends at {end}"
-    img.save(OUT)
+    page.save(OUT)
     size = OUT.stat().st_size
     if size > 1_048_576:
-        img.save(OUT.with_suffix(".jpg"), quality=88)
+        page.save(OUT.with_suffix(".jpg"), quality=88)
         print(f"PNG too big ({size}); wrote JPEG instead")
     else:
         print(f"wrote {OUT} ({size} bytes)")
 
 
-# The real dot-matrix land grid (100 x 25), loaded here so the
-# data tables above stay readable.
+# The dot-matrix land grid for the map (100 columns by 25
+# rows), kept at the end so the story tables above stay
+# readable.  Each '#' is one dot of land.
 MAP_ROWS = [
     "......####............................####............#.........##.###......###.....#.....#.........",
     "....#####..##.##.##.................#########............................######...#######......##...",

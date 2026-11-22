@@ -1,68 +1,66 @@
-// The World in One Day — Sunday 22 November 2026
+// The World in One Day — Sunday 22 November 2026.
 // Entry for the make.fun bounty "news-image-20261122".
 //
-// The newspaper page is designed in this repository (see
-// compose.py and assets/). This program emits the finished
-// page as a single PNG image file — no network, no clock,
-// no randomness — so two runs are byte-identical.
+// The finished newspaper page ships in this repository as
+// entry.png (composed by compose.py from the artwork in
+// assets/).  This program's whole job is to deliver that
+// page: it copies entry.png into the output directory and
+// then verifies the copy, so the graded run produces exactly
+// the file that was reviewed before submission.
 //
-// Grading runs this program in a fresh container whose
-// repository mount is READ-ONLY, so the page is written to
-// the output directory (MAKEFUN_OUTPUT_DIR, /output in the
-// grader) and nowhere else. An earlier version copied the
-// page beside this file instead and the graded run failed
-// with exit code 1 on the read-only mount; this version
-// writes only to the output directory, like the earlier editions'
-// program, which grades clean.
+// Two properties matter for grading:
+//   * Determinism — no network, no clock, no randomness, so
+//     repeated runs emit byte-identical output.
+//   * The repository is mounted READ-ONLY in the grader, so
+//     the only write goes to the output directory
+//     (MAKEFUN_OUTPUT_DIR, or /output when unset).  An
+//     earlier edition wrote a copy beside the program and
+//     its graded run failed on the read-only mount; this
+//     program writes nowhere else.
 
-import {
-  copyFileSync,
-  mkdirSync,
-  readFileSync,
-  statSync,
-} from "node:fs";
+import { copyFileSync, mkdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const here = dirname(fileURLToPath(import.meta.url));
-const source = join(here, "entry.png");
+const repoDir = dirname(fileURLToPath(import.meta.url));
+const pageFile = join(repoDir, "entry.png");
 const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
-const target = join(outDir, "entry.png");
+const outFile = join(outDir, "entry.png");
 
-const MAX_BYTES = 1_048_576; // the bounty's 1 MiB cap
-const PNG_MAGIC = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+// The bounty's caps: at most 1 MiB and at most 1024x1024.
+const BYTE_CAP = 1_048_576;
+const SIDE_CAP = 1024;
+const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
 mkdirSync(outDir, { recursive: true });
-copyFileSync(source, target);
+copyFileSync(pageFile, outFile);
 
-const bytes = statSync(target).size;
-if (bytes > MAX_BYTES) {
-  throw new Error(`image is ${bytes} bytes, over the 1 MiB cap`);
-}
-if (bytes !== statSync(source).size) {
+// The copy must be complete and inside the byte cap.
+const outBytes = statSync(outFile).size;
+if (outBytes !== statSync(pageFile).size) {
   throw new Error("copy incomplete: output size differs from source");
 }
+if (outBytes > BYTE_CAP) {
+  throw new Error(`image is ${outBytes} bytes, over the 1 MiB cap`);
+}
 
-const data = readFileSync(target);
-const head = data.subarray(0, PNG_MAGIC.length);
-for (let i = 0; i < PNG_MAGIC.length; i++) {
-  if (head[i] !== PNG_MAGIC[i]) {
+// It must really be a PNG: check the magic bytes, then read
+// the width and height out of the IHDR chunk (the first
+// chunk: 4 bytes of length, the type "IHDR", then width and
+// height as big-endian uint32) instead of trusting the name.
+const data = readFileSync(outFile);
+for (let i = 0; i < PNG_SIGNATURE.length; i++) {
+  if (data[i] !== PNG_SIGNATURE[i]) {
     throw new Error("output is not a PNG file");
   }
 }
-
-// The first chunk of a PNG is always IHDR: 4 bytes of length,
-// the type "IHDR", then width and height as big-endian uint32.
-// The bounty caps the page at 1024x1024, so verify the real
-// dimensions instead of trusting the file name.
-const ihdrType = data.subarray(12, 16).toString("ascii");
-if (ihdrType !== "IHDR") {
+if (data.subarray(12, 16).toString("ascii") !== "IHDR") {
   throw new Error("first PNG chunk is not IHDR");
 }
 const width = data.readUInt32BE(16);
 const height = data.readUInt32BE(20);
-if (width > 1024 || height > 1024) {
+if (width > SIDE_CAP || height > SIDE_CAP) {
   throw new Error(`image is ${width}x${height}, over the 1024x1024 cap`);
 }
 
-console.log(`Wrote ${target} (${bytes} bytes)`);
+console.log(`Wrote ${outFile} (${outBytes} bytes)`);
