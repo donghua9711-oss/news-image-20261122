@@ -93,19 +93,19 @@ TIMELINE = [("01:57", "Beijing hits back\nat FCC ban"), ("03:00", "COP31 objecti
             ("TODAY", "1956 Olympians\nreunite, MCG"), ("TODAY", "Bahrain takes\nstrikes to UN")]
 
 LEADS = [
-    dict(n=1, art="doc", kicker="ANTALYA, TÜRKIYE — CLIMATE", badge="CONFIRMED",
+    dict(n=1, art="assets/illo-cop31.png", kicker="ANTALYA, TÜRKIYE — CLIMATE", badge="CONFIRMED",
          head="COP31 deal goes to the wire in Antalya",
          body="The final text again omits fossil fuels. Delegations had "
               "until 03:00 GMT to object; the approval plenary opened at "
               "06:00 GMT in double overtime.",
          src="Reuters · AP · AFP"),
-    dict(n=2, art="factory", kicker="WEST JAVA, INDONESIA — DISASTER", badge="CONFIRMED",
+    dict(n=2, art="assets/illo-factory.png", kicker="WEST JAVA, INDONESIA — DISASTER", badge="CONFIRMED",
          head="Rescuers search factory ruins for 36 missing",
          body="Three workers are dead and four injured after Saturday's "
               "blaze; on Sunday rescuers picked through the smouldering "
               "ruins for 36 still missing.",
          src="Reuters"),
-    dict(n=3, art="gulf", kicker="MANAMA, BAHRAIN — GULF", badge="CONFIRMED",
+    dict(n=3, art="assets/illo-gulf.png", kicker="MANAMA, BAHRAIN — GULF", badge="CONFIRMED",
          head="Bahrain takes Iran strikes to the UN Council",
          body="Manama demands UN action and compensation for Saturday "
               "night's strikes; two tankers were hit near Hormuz and "
@@ -242,6 +242,19 @@ def art_gulf(d, x, y, w, h):
 ART = {"gulf": art_gulf, "factory": art_factory, "doc": art_doc}
 
 
+def cover(img, path, x, y, w, h):
+    """Paste a detailed cover illustration, centre-cropped to fill."""
+    art = Image.open(path).convert("RGB")
+    scale = max(w / art.width, h / art.height)
+    art = art.resize((round(art.width * scale), round(art.height * scale)),
+                     Image.LANCZOS)
+    left = (art.width - w) // 2
+    top = (art.height - h) // 2
+    img.paste(art.crop((left, top, left + w, top + h)), (x, y))
+    d = ImageDraw.Draw(img)
+    d.rectangle([x, y, x + w - 1, y + h - 1], outline=(120, 110, 95))
+
+
 # ------------------------------------------------------------- pin map
 
 MAP_ROWS = [
@@ -365,7 +378,10 @@ def build():
     ly, lw = 308, (CW - 32) // 3
     for i, lead in enumerate(LEADS):
         cx = MARGIN + i * (lw + 16)
-        ART[lead["art"]](d, cx, ly, lw, 118)
+        if lead["art"].endswith(".png"):
+            cover(img, lead["art"], cx, ly, lw, 118)
+        else:
+            ART[lead["art"]](d, cx, ly, lw, 118)
         ky = ly + 126
         numdot(d, cx, ky - 3, lead["n"])
         d.text((cx + 28, ky), lead["kicker"], font=F(SANS_B, 10), fill=INK)
